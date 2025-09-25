@@ -22,6 +22,14 @@ export class ApiRequests {
   }
 
   static async updateTaskStatus(taskId: string, status: Task["status"]) {
-    return this.axiosInstance.patch(`/task/${encodeURIComponent(taskId)}/status`, { newStatus: status }).then(res => res.data);
+    return this.axiosInstance.patch(`/task/${encodeURIComponent(taskId)}/status`, { newStatus: status });
+  }
+
+  static async uploadTaskFiles(taskId: string, files: FileList) {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("attached-files", file);
+    }
+    return this.axiosInstance.post(`/task/${encodeURIComponent(taskId)}/uploaded-files`, formData);
   }
 }

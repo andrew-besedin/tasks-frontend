@@ -7,18 +7,24 @@ type TaskContentProps = {
   task: Task;
   taskStatus: Task["status"];
   isStatusUploading: boolean;
+  areFilesUploading: boolean;
   onStatusChange: React.ChangeEventHandler<HTMLSelectElement>;
   onStatusUpdateClick: () => void;
+  onFilesInputChange: React.ChangeEventHandler<HTMLInputElement>;
+  onFilesUploadClick: () => void;
 }
 const TaskContent: React.FC<TaskContentProps> = ({
   task,
   taskStatus,
+  areFilesUploading,
   onStatusChange,
   onStatusUpdateClick,
-  isStatusUploading
+  isStatusUploading,
+  onFilesInputChange,
+  onFilesUploadClick,
 }) => {
 
-  const isUploading = !!(isStatusUploading);
+  const isUploading = !!(isStatusUploading || areFilesUploading);
 
   const uploadedFiles = task.fileNames;
 
@@ -58,8 +64,8 @@ const TaskContent: React.FC<TaskContentProps> = ({
               }
             </div>
             <div>
-              <input type="file" multiple />
-              <button>Upload files</button>
+              <input type="file" multiple onChange={onFilesInputChange} />
+              <button onClick={onFilesUploadClick}>Upload files</button>
             </div>
           </div>
         )
@@ -73,15 +79,28 @@ export const TaskPage: React.FC = () => {
 
   const [task, setTask] = useState<Task | null>(null);
   const [taskStatus, setTaskStatus] = useState<Task["status"] | null>(null);
+  const [filesToUpload, setFilesToUpload] = useState<FileList | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   const [isStatusUploading, setIsStatusUploading] = useState(false);
+  const [areFilesUploading, setAreFilesUploading] = useState(false);
 
   const { taskId } = useParams();
 
   const onStatusChange: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
     setTaskStatus(Number(event.target.value) as Task["status"]);
+  }
+
+  const onFilesInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    const files = event.target.files;
+
+    if (!files || files.length === 0) {
+      setFilesToUpload(null);
+      return;
+    }
+
+    setFilesToUpload(files);
   }
 
   async function onStatusUpdateClick() {
@@ -92,6 +111,22 @@ export const TaskPage: React.FC = () => {
       console.error(err);
     }
     setIsStatusUploading(false);
+    await fetchTask();
+  }
+
+  async function onFilesUploadClick() {
+    if (!filesToUpload) {
+      return;
+    }
+
+    setAreFilesUploading(true);
+    try {
+      await ApiRequests.uploadTaskFiles(taskId || "", filesToUpload);
+    } catch (err) {
+      console.error(err);
+    }
+    setAreFilesUploading(false);
+    setFilesToUpload(null);
     await fetchTask();
   }
 
@@ -144,6 +179,9 @@ export const TaskPage: React.FC = () => {
                     taskStatus={taskStatus}
                     task={task}
                     isStatusUploading={isStatusUploading}
+                    areFilesUploading={areFilesUploading}
+                    onFilesInputChange={onFilesInputChange}
+                    onFilesUploadClick={onFilesUploadClick}
                   />
                 )
               )
