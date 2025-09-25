@@ -18,28 +18,49 @@ const TaskContent: React.FC<TaskContentProps> = ({
   isStatusUploading
 }) => {
 
+  const isUploading = !!(isStatusUploading);
+
+  const uploadedFiles = task.fileNames;
+
   return (
     <div>
       <h3>{task.name}</h3>
-      {isStatusUploading 
+      {isUploading 
         ? (
           <p>Uploading...</p>
         )
         : (
           <div>
-            <p>Status:</p>
-            <select
-              id="select"
-              value={taskStatus}
-              onChange={onStatusChange}
-            >
-              <option value="0">Not Started</option>
-              <option value="1">In Progress</option>
-              <option value="2">Completed</option>
-            </select>
-            <button onClick={onStatusUpdateClick}>
-              Update Status
-            </button>
+            <div>
+              <p>Status:</p>
+              <select
+                id="select"
+                value={taskStatus}
+                onChange={onStatusChange}
+              >
+                <option value="0">Not Started</option>
+                <option value="1">In Progress</option>
+                <option value="2">Completed</option>
+              </select>
+              <button onClick={onStatusUpdateClick}>
+                Update Status
+              </button>
+            </div>
+            <div>
+              <p>Attached files:</p>
+              {uploadedFiles.length === 0 
+                ? <p>No attached files.</p>
+                : <ul>
+                  {uploadedFiles.map(file => (
+                    <li><a href={`/uploads/${encodeURIComponent(file)}`}>{file}</a></li>
+                  ))}
+                </ul>
+              }
+            </div>
+            <div>
+              <input type="file" multiple />
+              <button>Upload files</button>
+            </div>
           </div>
         )
       }

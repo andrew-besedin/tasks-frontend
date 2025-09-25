@@ -80,27 +80,28 @@ export const Home: React.FC = () => {
                 <p>Error while loading.</p>
               )
               : (
-                <TasksList tasks={tasks} />
+                <div>
+                  <TasksList tasks={tasks} />
+                  <div>
+                    <input
+                      type="text"
+                      value={newTaskName}
+                      onChange={(event) => setNewTaskName(event.target.value)}
+                      placeholder="Task name"
+                    />
+                    <button onClick={onAddTaskClick}>
+                      Add task
+                    </button>
+                    {
+                      isAddingLoading && (
+                        <p>Adding...</p>
+                      )
+                    }
+                  </div>
+                </div>
               )
           )
       }
-      <div>
-        <input
-          type="text"
-          value={newTaskName}
-          onChange={(event) => setNewTaskName(event.target.value)}
-          placeholder="Task name"
-        />
-        <button onClick={onAddTaskClick}>
-          Add task
-        </button>
-        {
-          isAddingLoading && (
-            <p>Adding...</p>
-          )
-        }
-      </div>
-      
     </div>
   );
 }
