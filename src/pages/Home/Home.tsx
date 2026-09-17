@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Task } from "../../types/Task";
+import { statusLabels, type Task } from "../../types/Task";
 import { ApiRequests } from "../../requests/api";
 import { Link } from "react-router";
 
@@ -9,17 +9,20 @@ type TasksListProps = {
 const TasksList: React.FC<TasksListProps> = ({ tasks }) => {
   if (tasks.length === 0) {
     return (
-      <p>Empty list.</p>
+      <p className="empty">Empty list.</p>
     )
   }
 
   return (
-    <ul>
+    <ul className="task-list">
       {
         tasks.map(task => (
-          <li>
+          <li key={task.id}>
             <Link to={`/task/${encodeURIComponent(task.id)}`}>
-              {task.name}
+              <span>{task.name}</span>
+              <span className={`status status-${task.status}`}>
+                {statusLabels[task.status]}
+              </span>
             </Link>
           </li>
         ))
@@ -66,31 +69,30 @@ export const Home: React.FC = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Tasks</h1>
-      <p>Tasks list:</p>
+    <main>
+      <h1>Task List</h1>
       {
         isLoading
           ? (
-            <p>Loading...</p>
+            <p className="empty">Loading...</p>
           )
           : (
             isError
               ? (
-                <p>Error while loading.</p>
+                <p className="empty">Error while loading.</p>
               )
               : (
                 <div>
                   <TasksList tasks={tasks} />
-                  <div>
+                  <div className="form-row">
                     <input
                       type="text"
                       value={newTaskName}
                       onChange={(event) => setNewTaskName(event.target.value)}
-                      placeholder="Task name"
+                      placeholder="New Task Name"
                     />
                     <button onClick={onAddTaskClick}>
-                      Add task
+                      Add Task
                     </button>
                     {
                       isAddingLoading && (
@@ -102,6 +104,6 @@ export const Home: React.FC = () => {
               )
           )
       }
-    </div>
+    </main>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import type { Task } from "../../types/Task";
+import { statusLabels, type Task } from "../../types/Task";
 import { ApiRequests } from "../../requests/api";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 type TaskContentProps = {
   task: Task;
@@ -31,14 +31,18 @@ const TaskContent: React.FC<TaskContentProps> = ({
   return (
     <div>
       <h3>{task.name}</h3>
-      {isUploading 
+      {isUploading
         ? (
-          <p>Uploading...</p>
+          <p className="empty">Uploading...</p>
         )
         : (
           <div>
-            <div>
-              <p>Status:</p>
+            <p>
+              Status: <span className={`status status-${task.status}`}>
+                {statusLabels[task.status]}
+              </span>
+            </p>
+            <div className="form-row">
               <select
                 id="select"
                 value={taskStatus}
@@ -52,20 +56,22 @@ const TaskContent: React.FC<TaskContentProps> = ({
                 Update Status
               </button>
             </div>
-            <div>
-              <p>Attached files:</p>
-              {uploadedFiles.length === 0 
-                ? <p>No attached files.</p>
-                : <ul>
-                  {uploadedFiles.map(file => (
-                    <li><a href={`/uploads/${encodeURIComponent(file)}`}>{file}</a></li>
-                  ))}
-                </ul>
+            <p>Uploaded files:</p>
+            <ul>
+              {uploadedFiles.length === 0
+                ? <li className="empty">No files uploaded.</li>
+                : uploadedFiles.map(file => (
+                  <li key={file}>
+                    <a href={`/uploads/${encodeURIComponent(file)}`} target="_blank">
+                      {file}
+                    </a>
+                  </li>
+                ))
               }
-            </div>
-            <div>
+            </ul>
+            <div className="form-row">
               <input type="file" multiple onChange={onFilesInputChange} />
-              <button onClick={onFilesUploadClick}>Upload files</button>
+              <button onClick={onFilesUploadClick}>Upload Files</button>
             </div>
           </div>
         )
@@ -163,14 +169,15 @@ export const TaskPage: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <main>
+      <Link className="back-link" to="/">&larr; Back to task list</Link>
       <h1>Task</h1>
       {
         isError
-          ? <p>Error while loading.</p>
+          ? <p className="empty">Error while loading.</p>
           : (
             isLoading
-              ? <p>Loading...</p>
+              ? <p className="empty">Loading...</p>
               : (
                 (task !== null) && (taskStatus !== null) && (
                   <TaskContent
@@ -187,6 +194,6 @@ export const TaskPage: React.FC = () => {
               )
           )
       }
-    </div>
+    </main>
   )
 }
