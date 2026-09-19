@@ -38,12 +38,27 @@ export const Home: React.FC = () => {
   const [isError, setIsError] = useState(false);
 
   const [newTaskName, setNewTaskName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [isAddingLoading, setIsAddingLoading] = useState(false);
 
+  function onNewTaskNameChange(value: string) {
+    setNewTaskName(value);
+    if (nameError && value.trim()) {
+      setNameError("");
+    }
+  }
+
   async function onAddTaskClick() {
+    if (!newTaskName.trim()) {
+      setNameError("Task name must not be empty.");
+      return;
+    }
+
+    setNameError("");
     setIsAddingLoading(true);
     try {
       await ApiRequests.createTask(newTaskName);
+      setNewTaskName("");
     } catch (err) {
       console.error(err);
     }
@@ -87,8 +102,9 @@ export const Home: React.FC = () => {
                   <div className="form-row">
                     <input
                       type="text"
+                      className={nameError ? "invalid" : ""}
                       value={newTaskName}
-                      onChange={(event) => setNewTaskName(event.target.value)}
+                      onChange={(event) => onNewTaskNameChange(event.target.value)}
                       placeholder="New Task Name"
                     />
                     <button onClick={onAddTaskClick}>
@@ -97,6 +113,11 @@ export const Home: React.FC = () => {
                     {
                       isAddingLoading && (
                         <p>Adding...</p>
+                      )
+                    }
+                    {
+                      nameError && (
+                        <p className="error">{nameError}</p>
                       )
                     }
                   </div>
